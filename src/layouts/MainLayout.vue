@@ -10,6 +10,7 @@
           aria-label="Menu"
           @click="toggleLeftDrawer"
         />
+        <q-toolbar-title class="q-py-lg">CONVICTI</q-toolbar-title>
       </q-toolbar>
     </q-header>
 
