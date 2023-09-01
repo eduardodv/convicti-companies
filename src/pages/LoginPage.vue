@@ -35,7 +35,7 @@
           />
 
           <div>
-            <q-btn label="Entrar" type="submit" color="secondary" class="full-width" size="md"/>
+            <q-btn label="Entrar" type="submit" color="secondary" class="full-width text-capitalize" size="md"/>
           </div>
         </q-form>
       </div>
@@ -92,11 +92,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-  body {
-    color: $white;
-    background-color: $primary;
-  }
-
   .container {
     width: 100%;
     max-width: 400px;
@@ -141,6 +136,10 @@ export default defineComponent({
       &__bottom--animated {
         transform: translateY(3px);
       }
+    }
+
+    .q-btn--rectangle {
+      border-radius: 6px;
     }
   }
 </style>

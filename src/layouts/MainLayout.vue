@@ -1,6 +1,6 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
+    <q-header elevated class="lt-md none">
       <q-toolbar>
         <q-btn
           flat
@@ -10,33 +10,55 @@
           aria-label="Menu"
           @click="toggleLeftDrawer"
         />
-
-        <q-toolbar-title>
-          Título
-        </q-toolbar-title>
-
-        <div>Quasar v{{ $q.version }}</div>
       </q-toolbar>
     </q-header>
 
     <q-drawer
       v-model="leftDrawerOpen"
       show-if-above
-      bordered
+      class="bg-primary text-white q-px-xl q-py-lg row column"
     >
-      <q-list>
+      <q-list
+        class="col"
+      >
+        <img
+          alt="Quasar logo"
+          src="~assets/logo-white.png"
+          class="logo"
+        >
+
         <q-item-label
           header
+          class="q-px-none text-white"
         >
-          Essential Links
+          MENU
         </q-item-label>
 
-        <EssentialLink
-          v-for="link in essentialLinks"
+        <MenuLink
+          v-for="link in menuLinks"
           :key="link.title"
           v-bind="link"
         />
+
       </q-list>
+      <q-item
+        clickable
+        tag="a"
+        to="/login"
+        class="logout-button col-auto q-mr-lg"
+      >
+        <q-item-section
+          avatar
+          class="q-pr-sm"
+          :style="'min-width: 30px'"
+        >
+          <q-icon name="power_settings_new" />
+        </q-item-section>
+
+        <q-item-section>
+          <q-item-label>Sair</q-item-label>
+        </q-item-section>
+      </q-item>
     </q-drawer>
 
     <q-page-container>
@@ -47,29 +69,28 @@
 
 <script>
 import { defineComponent, ref } from 'vue'
-import EssentialLink from 'components/EssentialLink.vue'
+import MenuLink from 'components/MenuLink.vue'
 
 const linksList = [
   {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: '/'
-  },
+    title: 'Empresas',
+    icon: 'domain',
+    route: '/'
+  }
 ]
 
 export default defineComponent({
   name: 'MainLayout',
 
   components: {
-    EssentialLink
+    MenuLink
   },
 
   setup () {
     const leftDrawerOpen = ref(false)
 
     return {
-      essentialLinks: linksList,
+      menuLinks: linksList,
       leftDrawerOpen,
       toggleLeftDrawer () {
         leftDrawerOpen.value = !leftDrawerOpen.value
@@ -78,3 +99,16 @@ export default defineComponent({
   }
 })
 </script>
+
+<style lang="scss">
+  .logo {
+    width: 100%;
+    margin: 2.2rem 0 4rem;
+  }
+
+  .logout-button {
+    border-radius: 6px;
+    width: 100%;
+    margin: 0;
+  }
+</style>
