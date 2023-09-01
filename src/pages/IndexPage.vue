@@ -31,7 +31,7 @@ export default defineComponent({
           $q.notify({
             color: 'negative',
             position: 'top',
-            message: 'Loading failed',
+            message: 'Houve um erro ao comunicar-se com a API',
             icon: 'report_problem'
           })
         })
