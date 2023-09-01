@@ -17,6 +17,28 @@ import { defineComponent, ref } from 'vue'
 
 export default defineComponent({
   name: 'IndexPage',
+
+  setup () {
+    const $q = useQuasar()
+    const data = ref(null)
+
+    function loadData () {
+      api.get('/api/companies')
+        .then((response) => {
+          data.value = response.data
+        })
+        .catch(() => {
+          $q.notify({
+            color: 'negative',
+            position: 'top',
+            message: 'Loading failed',
+            icon: 'report_problem'
+          })
+        })
+    }
+    loadData()
+    return { data }
+  }
 });
 
 
