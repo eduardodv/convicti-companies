@@ -101,9 +101,13 @@
                   <q-select
                     outlined
                     v-model="form.state"
-                    :options="statesList"
+                    :options="states"
+                    :loading="states.length < 1"
+                    emit-value
+                    map-options
+                    @update:model-value="val => loadCities(val)"
                     :rules="[
-                      val => val && val.length > 0 || 'Por favor, selecione um Estado.',
+                      val => val > 0 || 'Por favor, selecione um Estado.',
                     ]"
                   />
                 </div>
@@ -112,9 +116,12 @@
                   <q-select
                     outlined
                     v-model="form.city"
-                    :options="citiesList"
+                    :options="cities"
+                    :loading="cities.length < 1"
+                    emit-value
+                    map-options
                     :rules="[
-                      val => val && val.length > 0 || 'Por favor, selecione uma Cidadade.',
+                      val => val > 0 || 'Por favor, selecione uma Cidadade.',
                     ]"
                   />
                 </div>
@@ -132,10 +139,13 @@
                 <span>Categoria</span>
                 <q-select
                     outlined
-                    v-model="form.categories"
-                    :options="categoriesList"
+                    v-model="form.category"
+                    :options="categories"
+                    :loading="categories.length < 1"
+                    emit-value
+                    map-options
                     :rules="[
-                      val => val && val.length > 0 || 'Por favor, selecione uma Categoria.',
+                      val => val > 0 || 'Por favor, selecione uma Categoria.',
                     ]"
                   />
               </div>
@@ -153,7 +163,8 @@
 </template>
 
 <script>
-import { computed, defineComponent, ref } from 'vue'
+import { api } from 'src/boot/axios'
+import { computed, defineComponent, onMounted, ref } from 'vue'
 
 export default defineComponent({
   name: 'ModalCompanies',
@@ -161,6 +172,9 @@ export default defineComponent({
   props: {
     modelValue: {
       type: Boolean
+    },
+     states: {
+      type: Array
     },
   },
 
@@ -175,6 +189,8 @@ export default defineComponent({
     })
 
     const formRef = ref(null)
+    const cities = ref([])
+    const categories = ref([])
 
     const form = ref({
       cnpj: '',
@@ -186,12 +202,31 @@ export default defineComponent({
       state: '',
       city: '',
       observations: '',
-      categories: '',
+      category: '',
     })
 
-    const statesList = ['DF', 'PR', 'SC']
-    const citiesList = ['Brasília', 'Guarapuava', 'Itapema']
-    const categoriesList = ['Cat1', 'Cat2', 'Cat3']
+    const loadCities = async (state) => {
+      form.value.city = ''
+      cities.value = []
+
+      const response = await api.get(`/api/state-cities/cities?state_id=${state}`)
+      cities.value = response.data.map((city) => {
+        return {
+          label: city.title,
+          value: city.id
+        }
+      })
+    }
+
+    const loadCategories = async () => {
+      const response = await api.get(`/api/categories`)
+      categories.value = response.data.map((category) => {
+        return {
+          label: category.name,
+          value: category.id
+        }
+      })
+    }
 
     const submitForm = () => {
       formRef.value.submit()
@@ -201,13 +236,17 @@ export default defineComponent({
       console.log(form.value);
     }
 
+    onMounted(() => {
+      loadCategories()
+    })
+
     return {
       modalCompanies,
       formRef,
       form,
-      statesList,
-      citiesList,
-      categoriesList,
+      cities,
+      categories,
+      loadCities,
       submitForm,
       handleSubmit,
     }
