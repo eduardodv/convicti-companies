@@ -21,15 +21,14 @@
 
     <section class="map-container"></section>
 
-    <ModalCompanies v-model="showModalCompanies" />
+    <ModalCompanies v-model="showModalCompanies" :states="states" />
 
   </q-page>
 </template>
 
 <script>
-import { useQuasar } from 'quasar'
 import { api } from 'src/boot/axios'
-import { defineComponent, ref } from 'vue'
+import { defineComponent, onMounted, ref } from 'vue'
 
 import ModalCompanies from 'components/ModalCompanies.vue'
 
@@ -41,33 +40,27 @@ export default defineComponent({
   },
 
   setup () {
-    const $q = useQuasar()
-
-    const data = ref(null)
     const search = ref(null)
     const showModalCompanies = ref(false)
+    const states = ref([])
 
-
-    function loadData () {
-      api.get('/api/categories')
-        .then((response) => {
-          data.value = response.data
-        })
-        .catch(() => {
-          $q.notify({
-            color: 'negative',
-            position: 'top',
-            message: 'Houve um erro ao comunicar-se com a API',
-            icon: 'report_problem'
-          })
-        })
+    const loadStates = async () => {
+      const response = await api.get('/api/state-cities/states')
+      states.value = response.data.map((state) => {
+        return {
+          label: state.letter,
+          value: state.id
+        }
+      })
     }
 
-    loadData()
+    onMounted(() => {
+      loadStates()
+    })
 
     return {
-      data,
       search,
+      states,
       showModalCompanies
     }
   }
