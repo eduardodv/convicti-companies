@@ -10,6 +10,7 @@
         <q-form
           @submit="onSubmit"
           @reset="onReset"
+          greedy
         >
 
           <q-input
