@@ -19,7 +19,7 @@
       </div>
     </header>
 
-    <section class="map-container"></section>
+    <MapCompanies />
 
     <ModalCompanies v-model="showModalCompanies" :states="states" />
 
@@ -31,12 +31,14 @@ import { api } from 'src/boot/axios'
 import { defineComponent, onMounted, ref } from 'vue'
 
 import ModalCompanies from 'components/ModalCompanies.vue'
+import MapCompanies from 'components/MapCompanies.vue'
 
 export default defineComponent({
   name: 'IndexPage',
 
   components: {
-    ModalCompanies
+    ModalCompanies,
+    MapCompanies,
   },
 
   setup () {
@@ -138,14 +140,6 @@ export default defineComponent({
         height: 56px;
         margin-bottom: 1rem;
       }
-    }
-
-    .map-container {
-      width: 100%;
-      height: calc(100vh - 120px);
-      border-radius: 18px;
-      margin-top: 16px;
-      background-color: $dark;
     }
   }
 </style>
