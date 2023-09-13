@@ -33,9 +33,10 @@
                   v-model="form.cnpj"
                   lazy-rules
                   mask="##.###.###/####-##"
+                  unmasked-value
                   :rules="[
                     val => val && val.length > 0 || 'Por favor, digite o CNPJ da empresa.',
-                    val => val && val.length > 17 || 'CNPJ inválido!',
+                    val => val && val.length > 13 || 'CNPJ inválido!',
                   ]"
                 />
               </div>
@@ -54,13 +55,14 @@
                 <span>Whatsapp</span>
                 <q-input
                   outlined
-                  v-model="form.whatsapp"
+                  v-model="form.whatsapp_phone"
                   lazy-rules
                   type="tel"
                   mask="(##) #####-####"
+                  unmasked-value
                   :rules="[
                     val => val && val.length > 0 || 'Por favor, digite o Whatsapp da empresa.',
-                    val => val && val.length > 13 || 'Whatsapp inválido!',
+                    val => val && val.length > 10 || 'Whatsapp inválido!',
                   ]"
                 />
               </div>
@@ -68,7 +70,10 @@
                 <span>Representante</span>
                 <q-input
                   outlined
-                  v-model="form.representative"
+                  v-model="form.representantive_user"
+                   :rules="[
+                    val => val && val.length > 0 || 'Por favor, digite o representante da empresa.'
+                  ]"
                 />
               </div>
               <div class="row q-col-gutter-x-md">
@@ -76,7 +81,7 @@
                   <span>Latitude</span>
                   <q-input
                     outlined
-                    v-model="form.lat"
+                    v-model="form.latitude"
                     lazy-rules
                     :rules="[
                       val => val && val.length > 0 || 'Por favor, digite a Latitude.',
@@ -87,7 +92,7 @@
                   <span>Longitude</span>
                   <q-input
                     outlined
-                    v-model="form.long"
+                    v-model="form.longitude"
                     lazy-rules
                     :rules="[
                       val => val && val.length > 0 || 'Por favor, digite a Longitude.',
@@ -100,7 +105,7 @@
                   <span>Estado</span>
                   <q-select
                     outlined
-                    v-model="form.state"
+                    v-model="form.state_id"
                     :options="states"
                     :loading="states.length < 1"
                     emit-value
@@ -115,7 +120,7 @@
                   <span>Cidade</span>
                   <q-select
                     outlined
-                    v-model="form.city"
+                    v-model="form.city_id"
                     :options="cities"
                     :loading="cities.length < 1"
                     emit-value
@@ -132,14 +137,14 @@
                 <span>Observações</span>
                 <q-input
                   outlined
-                  v-model="form.observations"
+                  v-model="form.notes"
                 />
               </div>
               <div>
                 <span>Categoria</span>
                 <q-select
                     outlined
-                    v-model="form.category"
+                    v-model="form.category_id"
                     :options="categories"
                     :loading="categories.length < 1"
                     emit-value
@@ -193,20 +198,37 @@ export default defineComponent({
     const categories = ref([])
 
     const form = ref({
+      name: '',
       cnpj: '',
       email: '',
-      whatsapp: '',
-      representative: '',
-      lat: '',
-      long: '',
-      state: '',
-      city: '',
-      observations: '',
-      category: '',
+      whatsapp_phone: '',
+      representantive_user: '',
+      latitude: '',
+      longitude: '',
+      state_id: '',
+      city_id: '',
+      notes: '',
+      category_id: '',
     })
 
+    const resetFormFields = () => {
+      form.value = {
+        name: '',
+        cnpj: '',
+        email: '',
+        whatsapp_phone: '',
+        representantive_user: '',
+        latitude: '',
+        longitude: '',
+        state_id: '',
+        city_id: '',
+        notes: '',
+        category_id: '',
+      }
+    }
+
     const loadCities = async (state) => {
-      form.value.city = ''
+      form.value.city_id = ''
       cities.value = []
 
       const response = await api.get(`/api/state-cities/cities?state_id=${state}`)
@@ -232,8 +254,15 @@ export default defineComponent({
       formRef.value.submit()
     }
 
-    const handleSubmit = () => {
-      console.log(form.value);
+    const handleSubmit = async () => {
+      try {
+        await api.post('/api/companies', form.value)
+        emit('refreshCompanies')
+        resetFormFields()
+        modalCompanies.value = false
+      } catch(err) {
+        console.log(err);
+      }
     }
 
     onMounted(() => {
@@ -249,6 +278,7 @@ export default defineComponent({
       loadCities,
       submitForm,
       handleSubmit,
+      filterFn
     }
   }
 })

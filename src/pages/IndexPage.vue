@@ -19,9 +19,13 @@
       </div>
     </header>
 
-    <MapCompanies />
+    <MapCompanies ref="map" />
 
-    <ModalCompanies v-model="showModalCompanies" :states="states" />
+    <ModalCompanies
+      @refreshCompanies="refreshCompanies"
+      v-model="showModalCompanies"
+      :states="states"
+    />
 
   </q-page>
 </template>
@@ -46,6 +50,8 @@ export default defineComponent({
     const showModalCompanies = ref(false)
     const states = ref([])
 
+    const map = ref(null)
+
     const loadStates = async () => {
       const response = await api.get('/api/state-cities/states')
       states.value = response.data.map((state) => {
@@ -56,6 +62,10 @@ export default defineComponent({
       })
     }
 
+    const refreshCompanies = () => {
+      map.value.loadCompanies()
+    }
+
     onMounted(() => {
       loadStates()
     })
@@ -63,7 +73,9 @@ export default defineComponent({
     return {
       search,
       states,
-      showModalCompanies
+      showModalCompanies,
+      map,
+      refreshCompanies
     }
   }
 });
