@@ -124,6 +124,7 @@ import { api } from 'src/boot/axios';
         geoJson,
         markerIcon,
         coordinates,
+        loadCompanies
       }
     }
   });
