@@ -24,7 +24,6 @@
     <ModalCompanies
       @refreshCompanies="refreshCompanies"
       v-model="showModalCompanies"
-      :states="states"
     />
 
   </q-page>
@@ -48,31 +47,14 @@ export default defineComponent({
   setup () {
     const search = ref(null)
     const showModalCompanies = ref(false)
-    const states = ref([])
-
     const map = ref(null)
-
-    const loadStates = async () => {
-      const response = await api.get('/api/state-cities/states')
-      states.value = response.data.map((state) => {
-        return {
-          label: state.letter,
-          value: state.id
-        }
-      })
-    }
 
     const refreshCompanies = () => {
       map.value.loadCompanies()
     }
 
-    onMounted(() => {
-      loadStates()
-    })
-
     return {
       search,
-      states,
       showModalCompanies,
       map,
       refreshCompanies
