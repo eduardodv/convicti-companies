@@ -9,7 +9,6 @@
       <q-card-section class="q-pa-none modal-content">
         <q-form
           @submit="handleSubmit"
-          @reset="onReset"
           greedy
           ref="formRef"
         >
@@ -62,7 +61,7 @@
                   unmasked-value
                   :rules="[
                     val => val && val.length > 0 || 'Por favor, digite o Whatsapp da empresa.',
-                    val => val && val.length > 10 || 'Whatsapp inválido!',
+                    val => val && val.length > 10 || 'Whatsapp inválido!'
                   ]"
                 />
               </div>
@@ -121,14 +120,28 @@
                   <q-select
                     outlined
                     v-model="form.city_id"
-                    :options="cities"
+                    :options="optionsfilterCities"
+                    :disable="cities.length < 1"
                     :loading="cities.length < 1"
                     emit-value
                     map-options
+                    use-input
+                    hide-selected
+                    fill-input
+                    input-debounce="0"
+                    @filter="filterCities"
                     :rules="[
                       val => val > 0 || 'Por favor, selecione uma Cidadade.',
                     ]"
-                  />
+                  >
+                    <template v-slot:no-option>
+                      <q-item>
+                        <q-item-section class="text-grey">
+                          Nenhuma cidade encontrada.
+                        </q-item-section>
+                      </q-item>
+                    </template>
+                  </q-select>
                 </div>
               </div>
             </div>
@@ -177,10 +190,7 @@ export default defineComponent({
   props: {
     modelValue: {
       type: Boolean
-    },
-     states: {
-      type: Array
-    },
+    }
   },
 
   setup (props, {emit}) {
@@ -194,8 +204,10 @@ export default defineComponent({
     })
 
     const formRef = ref(null)
+    const states = ref([])
     const cities = ref([])
     const categories = ref([])
+    let optionsfilterCities = ref([])
 
     const form = ref({
       name: '',
@@ -227,16 +239,41 @@ export default defineComponent({
       }
     }
 
+    const loadStates = async () => {
+      const response = await api.get('/api/state-cities/states')
+      states.value = response.data.map((state) => {
+        return {
+          label: state.letter,
+          value: state.id
+        }
+      })
+    }
+
     const loadCities = async (state) => {
       form.value.city_id = ''
       cities.value = []
 
-      const response = await api.get(`/api/state-cities/cities?state_id=${state}`)
-      cities.value = response.data.map((city) => {
-        return {
-          label: city.title,
-          value: city.id
-        }
+      try {
+        const response = await api.get(`/api/state-cities/cities?state_id=${state}`)
+        cities.value = response.data.map((city) => {
+          return {
+            label: city.title,
+            value: city.id
+          }
+        })
+
+        optionsfilterCities.value = cities.value
+
+      } catch(err) {
+        console.log(err);
+      }
+    }
+
+    const filterCities = (val, update) => {
+      update(() => {
+        optionsfilterCities.value = cities.value.filter((v) => {
+          return v.label.toLowerCase().indexOf(val.toLowerCase()) > -1
+        })
       })
     }
 
@@ -261,11 +298,12 @@ export default defineComponent({
         resetFormFields()
         modalCompanies.value = false
       } catch(err) {
-        console.log(err);
+        console.log(err.response.data.errors)
       }
     }
 
     onMounted(() => {
+      loadStates()
       loadCategories()
     })
 
@@ -273,12 +311,14 @@ export default defineComponent({
       modalCompanies,
       formRef,
       form,
+      states,
       cities,
+      optionsfilterCities,
       categories,
       loadCities,
       submitForm,
       handleSubmit,
-      filterFn
+      filterCities
     }
   }
 })
