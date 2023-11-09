@@ -1,84 +1,86 @@
 <template>
-  <section class="map-container">
-    <ol-map
-      :loadTilesWhileAnimating="true"
-      :loadTilesWhileInteracting="true"
-      class="map"
-    >
-      <ol-view
-        ref="view"
-        :center="center"
-        :rotation="rotation"
-        :zoom="zoom"
-        :projection="projection"
-      />
+  <section class="map-container" :class="{'is-loading': !companies.length }">
+    <div>
+      <ol-map
+        :loadTilesWhileAnimating="true"
+        :loadTilesWhileInteracting="true"
+        class="map"
+      >
+        <ol-view
+          ref="view"
+          :center="center"
+          :rotation="rotation"
+          :zoom="zoom"
+          :projection="projection"
+        />
 
-      <ol-tile-layer>
-        <ol-source-osm />
-      </ol-tile-layer>
+        <ol-tile-layer>
+          <ol-source-osm />
+        </ol-tile-layer>
 
-      <ol-vector-layer>
-        <ol-source-vector ref="vectorsource">
-        <ol-animation-fade :duration="4000">
-          <ol-feature v-for="index in 2" :key="index">
-            <ol-geom-multi-point
-              :coordinates="coordinates"
-            ></ol-geom-multi-point>
+        <ol-vector-layer>
+          <ol-source-vector ref="vectorsource">
+          <ol-animation-fade :duration="4000">
+            <ol-feature v-for="index in 2" :key="index">
+              <ol-geom-multi-point
+                :coordinates="coordinates"
+              ></ol-geom-multi-point>
 
-            <ol-style>
-              <ol-style-icon :src="markerIcon" :scale="0.3"></ol-style-icon>
-            </ol-style>
-          </ol-feature>
-        </ol-animation-fade>
-      </ol-source-vector>
-      </ol-vector-layer>
-    </ol-map>
+              <ol-style>
+                <ol-style-icon :src="markerIcon" :scale="0.3"></ol-style-icon>
+              </ol-style>
+            </ol-feature>
+          </ol-animation-fade>
+        </ol-source-vector>
+        </ol-vector-layer>
+      </ol-map>
 
-    <q-card class="card-company">
-      <q-card-section class="q-pa-none card-company__header">
-        <div class="text-h5">Nome da Empresa</div>
-        <div>Nome do representante</div>
-        <q-item-section class="icon" avatar>
-            <q-icon name="domain" />
-        </q-item-section>
-      </q-card-section>
+      <q-card class="card-company">
+        <q-card-section class="q-pa-none card-company__header">
+          <div class="text-h5">Nome da Empresa</div>
+          <div>Nome do representante</div>
+          <q-item-section class="icon" avatar>
+              <q-icon name="domain" />
+          </q-item-section>
+        </q-card-section>
 
-      <q-card-section class="card-company__body q-pa-none">
-        <div class="row item">
-          <div class="col-12 col-sm-5">
-            <q-item-section class="icon" avatar>
-              <q-icon name="mail" />
-            </q-item-section>
-            <span>E-mail</span>
+        <q-card-section class="card-company__body q-pa-none">
+          <div class="row item">
+            <div class="col-12 col-sm-5">
+              <q-item-section class="icon" avatar>
+                <q-icon name="mail" />
+              </q-item-section>
+              <span>E-mail</span>
+            </div>
+            <div class="col-12 col-sm-7">
+              <span class="text">email@email.com</span>
+            </div>
           </div>
-          <div class="col-12 col-sm-7">
-            <span class="text">email@email.com</span>
+          <div class="row item">
+            <div class="col-12 col-sm-5">
+              <q-item-section class="icon" avatar>
+                <q-icon name="location_on" />
+              </q-item-section>
+              <span>Localização</span>
+            </div>
+            <div class="col-md-7">
+              <span class="text">Cidade - UF</span>
+            </div>
           </div>
-        </div>
-        <div class="row item">
-          <div class="col-12 col-sm-5">
-            <q-item-section class="icon" avatar>
-              <q-icon name="location_on" />
-            </q-item-section>
-            <span>Localização</span>
+          <div class="row item">
+            <div class="col-12 col-sm-5">
+              <q-item-section class="icon" avatar>
+                <q-icon name="category" />
+              </q-item-section>
+              <span>Categoria</span>
+            </div>
+            <div class="col-12 col-sm-7">
+              <span class="text solid">Categoria</span>
+            </div>
           </div>
-          <div class="col-md-7">
-            <span class="text">Cidade - UF</span>
-          </div>
-        </div>
-        <div class="row item">
-          <div class="col-12 col-sm-5">
-            <q-item-section class="icon" avatar>
-              <q-icon name="category" />
-            </q-item-section>
-            <span>Categoria</span>
-          </div>
-          <div class="col-12 col-sm-7">
-            <span class="text solid">Categoria</span>
-          </div>
-        </div>
-      </q-card-section>
-    </q-card>
+        </q-card-section>
+      </q-card>
+    </div>
   </section>
 </template>
 
@@ -124,6 +126,7 @@ import { api } from 'src/boot/axios';
         geoJson,
         markerIcon,
         coordinates,
+        companies,
         loadCompanies
       }
     }
@@ -131,6 +134,15 @@ import { api } from 'src/boot/axios';
 </script>
 
 <style lang="scss">
+  @keyframes lds-dual-ring {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
   .map-container {
     width: 100%;
     height: calc(100vh - 120px);
@@ -139,6 +151,30 @@ import { api } from 'src/boot/axios';
     background-color: #dfdfdf;
     overflow: hidden;
     position: relative;
+
+    &.is-loading {
+      pointer-events: none;
+
+      > div {
+        height: inherit;
+        filter: blur(4px);
+      }
+
+      &:after {
+        content: '';
+        position: absolute;
+        z-index: 2;
+        top: calc(50% - 25px);
+        left: calc(50% - 25px);
+        display: block;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        border: 7px solid $labels;
+        border-color: $labels $labels $labels transparent;
+        animation: lds-dual-ring 1.2s linear infinite;
+      }
+    }
 
     .map {
       position: absolute;
