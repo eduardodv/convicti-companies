@@ -8,7 +8,7 @@
       </q-card-section>
       <q-card-section class="q-pa-none modal-content">
         <q-form
-          @submit="handleSubmit"
+          @submit="submitForm"
           greedy
           ref="formRef"
         >
@@ -20,6 +20,9 @@
                   outlined
                   v-model="form.name"
                   lazy-rules
+                  :error="!!errors?.name"
+                  :error-message="errors?.name"
+                  @update:model-value="removeError('name')"
                   :rules="[
                     val => val && val.length > 0 || 'Por favor, digite o nome da empresa.'
                   ]"
@@ -33,6 +36,9 @@
                   lazy-rules
                   mask="##.###.###/####-##"
                   unmasked-value
+                  :error="!!errors?.cnpj"
+                  :error-message="errors?.cnpj"
+                  @update:model-value="removeError('cnpj')"
                   :rules="[
                     val => val && val.length > 0 || 'Por favor, digite o CNPJ da empresa.',
                     val => val && val.length > 13 || 'CNPJ inválido!',
@@ -45,6 +51,9 @@
                   outlined
                   v-model="form.email"
                   lazy-rules
+                  :error="!!errors?.email"
+                  :error-message="errors?.email"
+                  @update:model-value="removeError('email')"
                   :rules="[
                     val => val && val.length > 0 || 'Por favor, digite o E-mail da empresa.',
                   ]"
@@ -59,6 +68,9 @@
                   type="tel"
                   mask="(##) #####-####"
                   unmasked-value
+                  :error="!!errors?.whatsapp_phone"
+                  :error-message="errors?.whatsapp_phone"
+                  @update:model-value="removeError('whatsapp_phone')"
                   :rules="[
                     val => val && val.length > 0 || 'Por favor, digite o Whatsapp da empresa.',
                     val => val && val.length > 10 || 'Whatsapp inválido!'
@@ -70,7 +82,10 @@
                 <q-input
                   outlined
                   v-model="form.representantive_user"
-                   :rules="[
+                  :error="!!errors?.representantive_user"
+                  :error-message="errors?.representantive_user"
+                  @update:model-value="removeError('representantive_user')"
+                  :rules="[
                     val => val && val.length > 0 || 'Por favor, digite o representante da empresa.'
                   ]"
                 />
@@ -82,6 +97,9 @@
                     outlined
                     v-model="form.latitude"
                     lazy-rules
+                    :error="!!errors?.latitude"
+                    :error-message="errors?.latitude"
+                    @update:model-value="removeError('latitude')"
                     :rules="[
                       val => val && val.length > 0 || 'Por favor, digite a Latitude.',
                     ]"
@@ -93,6 +111,9 @@
                     outlined
                     v-model="form.longitude"
                     lazy-rules
+                    :error="!!errors?.longitude"
+                    :error-message="errors?.longitude"
+                    @update:model-value="removeError('longitude')"
                     :rules="[
                       val => val && val.length > 0 || 'Por favor, digite a Longitude.',
                     ]"
@@ -109,7 +130,10 @@
                     :loading="states.length < 1"
                     emit-value
                     map-options
-                    @update:model-value="val => loadCities(val)"
+                    :error="!!errors?.state_id"
+                    :error-message="errors?.state_id"
+                    @update:model-value="val => [loadCities(val), removeError('state_id')]"
+
                     :rules="[
                       val => val > 0 || 'Por favor, selecione um Estado.',
                     ]"
@@ -130,6 +154,9 @@
                     fill-input
                     input-debounce="0"
                     @filter="filterCities"
+                    :error="!!errors?.city_id"
+                    :error-message="errors?.city_id"
+                    @update:model-value="removeError('city_id')"
                     :rules="[
                       val => val > 0 || 'Por favor, selecione uma Cidadade.',
                     ]"
@@ -162,6 +189,9 @@
                     :loading="categories.length < 1"
                     emit-value
                     map-options
+                    :error="!!errors?.category_id"
+                    :error-message="errors?.category_id"
+                    @update:model-value="removeError('category_id')"
                     :rules="[
                       val => val > 0 || 'Por favor, selecione uma Categoria.',
                     ]"
@@ -174,13 +204,20 @@
 
       <q-card-actions class="q-pa-none" align="center">
         <q-btn flat label="Cancelar" class="btn btn-cancel" v-close-popup />
-        <q-btn label="Cadastrar Empresa" @click="submitForm" class="btn btn-confirm" />
+        <q-btn
+          label="Cadastrar Empresa"
+          class="btn btn-confirm"
+          @click="handleSubmitForm"
+          :loading="isSubmit"
+          :disabled="isSubmit"
+        />
       </q-card-actions>
     </q-card>
   </q-dialog>
 </template>
 
 <script>
+import { useQuasar } from 'quasar'
 import { api } from 'src/boot/axios'
 import { computed, defineComponent, onMounted, ref } from 'vue'
 
@@ -194,6 +231,8 @@ export default defineComponent({
   },
 
   setup (props, {emit}) {
+    const $q = useQuasar()
+
     const modalCompanies = computed({
       get() {
         return props.modelValue
@@ -204,6 +243,8 @@ export default defineComponent({
     })
 
     const formRef = ref(null)
+    let isSubmit = ref(false)
+
     const states = ref([])
     const cities = ref([])
     const categories = ref([])
@@ -287,18 +328,42 @@ export default defineComponent({
       })
     }
 
-    const submitForm = () => {
+    let errors = ref({})
+
+    const removeError = (field) => {
+      delete errors.value[field]
+    }
+
+    const handleSubmitForm = () => {
       formRef.value.submit()
     }
 
-    const handleSubmit = async () => {
+    const submitForm = async () => {
+      isSubmit.value = true
+
       try {
         await api.post('/api/companies', form.value)
         emit('refreshCompanies')
         resetFormFields()
         modalCompanies.value = false
+        isSubmit.value = false
+
+        $q.notify({
+          color: 'green-9',
+          textColor: 'white',
+          icon: 'domain_add',
+          message: 'Empresa cadastrada com sucesso!'
+        })
       } catch(err) {
-        console.log(err.response.data.errors)
+        const errorObj = {}
+
+        isSubmit.value = false
+
+        for(const key in err.response.data.errors) {
+          errorObj[key] = err.response.data.errors[key][0]
+        }
+
+        errors.value = errorObj
       }
     }
 
@@ -315,10 +380,13 @@ export default defineComponent({
       cities,
       optionsfilterCities,
       categories,
+      isSubmit,
       loadCities,
+      handleSubmitForm,
       submitForm,
-      handleSubmit,
-      filterCities
+      filterCities,
+      errors,
+      removeError
     }
   }
 })
@@ -358,17 +426,18 @@ export default defineComponent({
       padding: 1rem 0 2.5rem;
 
       .q-field {
-        padding-bottom: 20px;
-        margin-top: 3px;
+        padding-bottom: .9375rem;
+        margin-top: .1875rem;
 
         &__control,
         &__native {
-          height: 40px;
-          min-height: 40px;
+          height: 2.5rem;
+          min-height: 2.5rem;
         }
 
         &__control {
           border-radius: 6px;
+          margin-bottom: .3125rem;
           background-color: $white;
 
           > div {
@@ -385,18 +454,30 @@ export default defineComponent({
         }
 
         &__bottom {
-          padding: 4px 0 0 0;
+          padding: 0;
+          min-height: auto;
+
+          @media (max-width: $breakpoint-xs-max) {
+            position: relative;
+            margin-bottom: -5px;
+            min-height: auto;
+            transform: translateY(0);
+          }
         }
 
         &__messages {
           white-space: nowrap;
+
+          @media (max-width: $breakpoint-xs-max) {
+            white-space: normal;
+          }
         }
       }
     }
 
     .btn {
-      width: 180px;
-      height: 46px;
+      width: 11.25rem;
+      height: 2.875rem;
       text-transform: capitalize;
       border-radius: 6px;
       color: $labels;
@@ -408,10 +489,10 @@ export default defineComponent({
       }
 
       @media (max-width: $breakpoint-xs-max) {
-        margin: 5px;
+        margin: .3125rem;
 
         &+.btn {
-          margin-left: 5px;
+          margin-left: .3125rem;
         }
       }
     }
