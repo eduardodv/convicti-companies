@@ -77,6 +77,11 @@ const linksList = [
     title: 'Empresas',
     icon: 'domain',
     route: '/'
+  },
+  {
+    title: 'Sobre',
+    icon: 'info',
+    route: '/about'
   }
 ]
 
