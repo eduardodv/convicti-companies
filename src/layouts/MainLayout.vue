@@ -17,38 +17,39 @@
     <q-drawer
       v-model="leftDrawerOpen"
       show-if-above
-      class="bg-primary text-white q-px-xl q-py-lg row column"
+      class="bg-primary text-white q-px-xl q-py-lg row"
     >
       <q-list
-        class="col"
+        class="col flex column justify-between"
       >
-      <router-link to="/">
-        <img
-          alt="Quasar logo"
-          src="~assets/logo-white.png"
-          class="logo"
-        >
-      </router-link>
+        <div>
+          <router-link to="/">
+            <img
+              alt="Quasar logo"
+              src="~assets/logo-white.png"
+              class="logo"
+            >
+          </router-link>
 
-        <q-item-label
-          header
-          class="q-px-none text-white"
-        >
-          MENU
-        </q-item-label>
+          <q-item-label
+            header
+            class="q-px-none text-white"
+          >
+            MENU
+          </q-item-label>
 
-        <MenuLink
-          v-for="link in menuLinks"
-          :key="link.title"
-          v-bind="link"
-        />
+          <MenuLink
+            v-for="link in menuLinks"
+            :key="link.title"
+            v-bind="link"
+          />
+        </div>
 
-      </q-list>
-      <q-item
+        <q-item
         clickable
         tag="a"
         to="/login"
-        class="logout-button col-auto q-mr-lg"
+        class="logout-button col-auto q-mt-xl"
       >
         <q-item-section
           avatar
@@ -62,6 +63,7 @@
           <q-item-label>Sair</q-item-label>
         </q-item-section>
       </q-item>
+      </q-list>
     </q-drawer>
 
     <q-page-container>
@@ -124,6 +126,5 @@ export default defineComponent({
   .logout-button {
     border-radius: 6px;
     width: 100%;
-    margin: 0;
   }
 </style>
