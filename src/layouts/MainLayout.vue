@@ -22,11 +22,13 @@
       <q-list
         class="col"
       >
+      <router-link to="/">
         <img
           alt="Quasar logo"
           src="~assets/logo-white.png"
           class="logo"
         >
+      </router-link>
 
         <q-item-label
           header
@@ -110,6 +112,13 @@ export default defineComponent({
   .logo {
     width: 100%;
     margin: 2.2rem 0 4rem;
+    transition: all 0.2s ease;
+
+    @media (hover: hover) {
+      &:hover {
+        transform: translateX(7px);
+      }
+    }
   }
 
   .logout-button {
